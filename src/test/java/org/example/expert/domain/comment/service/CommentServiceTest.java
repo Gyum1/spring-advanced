@@ -34,22 +34,23 @@ class CommentServiceTest {
     private CommentService commentService;
 
     @Test
-    public void comment_등록_중_할일을_찾지_못해_에러가_발생한다() {
+    public void comment_등록_중_할일을_찾지_못해_ServerException이_발생한다() {
         // given
-        long todoId = 1;
+        long todoId = 1L;
         CommentSaveRequest request = new CommentSaveRequest("contents");
         AuthUser authUser = new AuthUser(1L, "email", UserRole.USER);
 
-        given(todoRepository.findById(anyLong())).willReturn(Optional.empty());
+        // 정확한 인자값 매칭
+        given(todoRepository.findById(todoId)).willReturn(Optional.empty());
 
-        // when
-        ServerException exception = assertThrows(ServerException.class, () -> {
-            commentService.saveComment(authUser, todoId, request);
-        });
+        // when & then
+        ServerException exception = assertThrows(ServerException.class, () ->
+                commentService.saveComment(authUser, todoId, request)
+        );
 
-        // then
         assertEquals("Todo not found", exception.getMessage());
     }
+
 
     @Test
     public void comment를_정상적으로_등록한다() {
